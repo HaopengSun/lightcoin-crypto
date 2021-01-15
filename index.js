@@ -1,29 +1,55 @@
-let balance = 500.00;
-
-class Withdrawal {
-
-  constructor(amount) {
-    this.amount = amount;
+class Transaction {
+  constructor(amount, account) {
+    this.amount  = amount;
+    this.account = account;
   }
-
+  // account passed is a class which has twn properties, name and balance
+  // because account is an obejct, the old balance is changed
   commit() {
-    balance -= this.amount;
+    if(!this.isAllowed()) return false;
+    this.time = new Date();
+    this.account.addTransaction(this);
   }
-
+  isAllowed(){
+    return this.account.balance + this.value > 0;
+  }
 }
 
+class Withdrawal extends Transaction {
+  get value(){
+    return -this.amount;
+  }
+}
 
+class Deposit extends Transaction {
+  get value(){
+    return this.amount;
+  }
+}
 
+class Account {
+  constructor(username) {
+    this.username = username;
+    this.transaction = [];
+  }
+  get balance(){
+    let balance = 0;
+    if (this.transaction.length > 0){
+      for (let trans of this.transaction) {
+    	  balance += trans.value;
+      }
+    }
+    return balance;
+  }
+  addTransaction(transaction) {
+    this.transaction.push(transaction);
+  }
+}
 
-// DRIVER CODE BELOW
-// We use the code below to "drive" the application logic above and make sure it's working as expected
-
-t1 = new Withdrawal(50.25);
+const myAccount = new Account('billybob');
+console.log('Starting Balance:', myAccount.balance);
+const t1 = new Deposit(120.00, myAccount);
 t1.commit();
-console.log('Transaction 1:', t1);
-
-t2 = new Withdrawal(9.99);
+const t2 = new Withdrawal(300.00, myAccount);
 t2.commit();
-console.log('Transaction 2:', t2);
-
-console.log('Balance:', balance);
+console.log('Ending Balance:', myAccount.balance);
